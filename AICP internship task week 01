@@ -1,0 +1,149 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+
+using namespace std;
+
+// Arrays to store item information
+vector<string> item_codes = {"A1", "A2", "B1", "B2", "B3", "C1", "C2", "C3", "D1", "D2", "E1", "E2", "E3", "F1", "F2", "G1", "G2"};
+vector<string> item_descriptions = {
+    "Compact Case  ", "Tower Case ", "8 GB RAM", "16 GB RAM", "32 GB RAM",
+    "1 TB HDD", "2 TB HDD", "4 TB HDD",
+    "240 GB SSD", "480 GB SSD",
+    "1 TB Second HDD", "2 TB Second HDD", "4 TB Second HDD",
+    "DVD/Blu-Ray Player", "DVD/Blu-Ray Re-writer",
+    "Standard OS", "Professional OS"
+};
+vector<double> item_prices = {75.00, 150.00, 79.99, 149.99, 299.99, 49.99, 89.99, 129.99, 59.99, 119.99, 49.99, 89.99, 129.99, 50.00, 100.00, 100.00, 175.00};
+
+// Function to display available items
+// Function to display available items in a table format
+void display_items() {
+    cout << "Available Items:" << endl;
+    cout << "Code\t\tName\t\t\t\t\t\tPrice" << endl;
+    cout << "---------------------------------------------------------" << endl;
+
+    for (int i = 0; i < item_codes.size(); ++i) {
+        cout << item_codes[i] << "\t\t\t" << item_descriptions[i];
+        // Adjust the spacing to align the prices properly
+        int spacing = 30 - item_descriptions[i].size();
+        for (int j = 0; j < spacing; j++) {
+            cout << " ";
+        }
+        cout << "$" << item_prices[i] << endl;
+         cout << "---------------------------------------------------------" << endl;
+    }
+}
+
+
+// Function to choose an item from a category
+string choose_item(string category_name, vector<string> category_items) {
+    cout << "\nChoose a " << category_name << ":" << endl;
+    display_items();
+    string chosen_item;
+    while (true) {
+        cout << "Enter the item code for your " << category_name << " choice (or 'done' to finish): ";
+        cin >> chosen_item;
+        transform(chosen_item.begin(), chosen_item.end(), chosen_item.begin(), ::toupper);
+        if (find(category_items.begin(), category_items.end(), chosen_item) != category_items.end()) {
+            return chosen_item;
+        } else if (chosen_item == "DONE") {
+            return "";
+        } else {
+            cout << "Invalid item code. Please try again." << endl;
+        }
+    }
+}
+
+int main() {
+    cout << "Welcome to the Custom PC Builder!" << endl;
+    cout << "You can choose one case, one RAM, and one Main Hard Disk Drive for your computer." << endl;
+
+    // Choose components
+    
+    
+    string chosen_case = choose_item("Case", {"A1", "A2"});
+    string chosen_ram = choose_item("RAM", {"B1", "B2", "B3"});
+    string chosen_hdd = choose_item("Main Hard Disk Drive", {"C1", "C2", "C3"});
+
+    // Calculate the total price
+    double basic_components_price = 200.00;
+    double chosen_items_price = item_prices[distance(item_codes.begin(), find(item_codes.begin(), item_codes.end(), chosen_case))] +
+        item_prices[distance(item_codes.begin(), find(item_codes.begin(), item_codes.end(), chosen_ram))] +
+        item_prices[distance(item_codes.begin(), find(item_codes.begin(), item_codes.end(), chosen_hdd))];
+
+    double total_price = basic_components_price + chosen_items_price;
+
+    // Lists to store additional items
+    vector<string> additional_items;
+
+    // Allow the customer to choose additional items
+    while (true) {
+        cout << "\nChoose additional items from any category:" << endl;
+        string additional_item = choose_item("Additional Item", item_codes);
+        if (!additional_item.empty()) {
+            additional_items.push_back(additional_item);
+        } else {
+            break;
+        }
+    }
+
+    // Calculate the price of additional items
+    double additional_items_price = 0;
+    for (const string& item : additional_items) {
+        additional_items_price += item_prices[distance(item_codes.begin(), find(item_codes.begin(), item_codes.end(), item))];
+    }
+
+    // Update the total price
+    total_price += additional_items_price;
+
+    // Determine the discount based on the number of additional items
+    double discount = 0.0;
+    if (additional_items.size() == 1) {
+        discount = 0.05;  // 5% discount for one additional item
+    } else if (additional_items.size() >= 2) {
+        discount = 0.10;  // 10% discount for two or more additional items
+    }
+
+    // Calculate the discount amount
+    double discount_amount = discount * total_price;
+
+    // Apply the discount
+    total_price -= discount_amount;
+
+    // Display chosen items, additional items, discount, amount saved, and the new total price
+    cout << "\nChosen Components:" << endl;
+    cout << "Case: " << chosen_case << " - " << item_descriptions[distance(item_codes.begin(), find(item_codes.begin(), item_codes.end(), chosen_case))] << endl;
+    cout << "RAM: " << chosen_ram << " - " << item_descriptions[distance(item_codes.begin(), find(item_codes.begin(), item_codes.end(), chosen_ram))] << endl;
+    cout << "Main Hard Disk Drive: " << chosen_hdd << " - " << item_descriptions[distance(item_codes.begin(), find(item_codes.begin(), item_codes.end(), chosen_hdd))] << endl;
+
+    if (!additional_items.empty()) {
+        cout << "\nChosen Additional Items:" << endl;
+        for (const string& item : additional_items) {
+            cout << item << " - " << item_descriptions[distance(item_codes.begin(), find(item_codes.begin(), item_codes.end(), item))] << endl;
+        }
+    }
+    
+    cout << "---------------------------------------------------------" << endl<<endl;
+
+    cout << "\nTotal Price (before discount): $" << total_price + discount_amount << endl;
+    cout << "Discount Applied: " << discount * 100 << "%" << endl;
+    cout << "Amount Saved: $" << discount_amount << endl<<endl;
+   cout << "---------------------------------------------------------" << endl<<endl;
+    cout << "New Total Price (after discount): $" << total_price << endl;
+
+    // Ask the user if they want to buy more or exit
+    string buy_more;
+     cout << "---------------------------------------------------------" << endl<<endl;
+    cout << "\nDo you want to buy more items or exit (buy/exit)? ";
+    cin >> buy_more;
+    if (buy_more == "buy") {
+        main();  // Restart the program to buy more items
+    } else {
+        cout << "Thank you for using the Custom PC Builder. Goodbye!" << endl;
+          cout << "---------------------------------------------------------" << endl<<endl;
+    }
+
+    return 0;
+}
